@@ -26,7 +26,7 @@ class DetectionManager:
     def handle_event(self, event, event_processor, event_sender):
         if event['Code'] == 'CrossRegionDetection' or event['Code'] == 'SmartMotionHuman':
             current_time = time.time()
-            detection_delay_threshold = 20  # 15 seconds, or any value you find appropriate
+            detection_delay_threshold = 10  # 10 second of delay
 
             if event_processor.last_human_detection_timestamp is None :
                 event_processor.last_human_detection_timestamp = current_time
@@ -36,6 +36,9 @@ class DetectionManager:
                 event_processor.last_human_detection_timestamp = None
                 # TODO : récupérer la vidéo et l'envoyer sur strapi.
                 pass
+            else :
+                # TODO : faire l'enregistrement de la vidéo
+                pass
 
     def process_detection(self, event_data):
         for camera, recorder, alert in zip(self.cameras, self.recorders, self.alerts):
@@ -44,6 +47,7 @@ class DetectionManager:
                 if person_detected and not recorder.is_recording():
                     alert.lancer_alerte(
                         camera_id=camera.id, nom_alerte="Personne détectée", camera_url=camera.url)
+                    recorder.start_recording()
 
     def run(self):
         event_sender = EventSender(

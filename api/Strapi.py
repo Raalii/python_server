@@ -1,6 +1,9 @@
 import os
 
 import requests
+from dotenv import load_dotenv
+
+load_dotenv()
 
 
 class StrapiClient:
@@ -13,7 +16,7 @@ class StrapiClient:
     def connect(self):
         """Fonction qui va retourner le token nécéssaire à toute les interactions avec l'API"""
         response = self.post(
-            'auth/local', {"identifier": "python@gmail.com", "password": "python"})
+            'auth/local', {"identifier": os.getenv("API_USER"), "password": os.getenv("API_PASSWORD")})
         return response["jwt"]
 
     def _get_headers(self, content_type="application/json"):
@@ -22,11 +25,10 @@ class StrapiClient:
             headers["Authorization"] = f"Bearer {self.jwt_token}"
         return headers
 
-
     def get(self, endpoint, params=None):
         url = f"{self.base_url}/{endpoint}"
         headers = self._get_headers()
-        print(headers)
+        # print(headers)
         response = requests.get(url, headers=headers, params=params)
         response.raise_for_status()
         return response.json()
@@ -55,7 +57,7 @@ class StrapiClient:
     def fetch_all_data(self):
         response = self.get('cameras?populate=*')
         data = []
-        print(response["data"])
+        # print(response["data"])
         for camera in response["data"]:
             attr = camera["attributes"]
             data.append({"id": camera["id"], "url": attr["url"],
